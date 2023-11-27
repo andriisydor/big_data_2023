@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
 
-from settings import DATA_DIRECTORY_PATH, TRIP_FARE_PATH
+from settings import DATA_DIRECTORY_PATH, TRIP_FARE_PATH, TRIP_DATA_PATH
 from app.read_write import CSVManager
 
 
@@ -16,6 +16,11 @@ def main():
 
     trip_fare_df = csv_manager.read(TRIP_FARE_PATH)
     trip_fare_df.show()
+    print(trip_fare_df.columns)
+
+    trip_data_df = csv_manager.read(TRIP_DATA_PATH)
+    trip_data_df.show()
+    print(trip_data_df.columns)
 
 
 if __name__ == '__main__':

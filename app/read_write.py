@@ -14,18 +14,18 @@ class CSVManager:
         self.__spark_session = spark_session
         self.__data_directory_path = data_directory_path
 
-    def read(self, file_in_data_dir, header=True):
+    def read(self, path_in_data_dir, header=True):
         """Reads PySpark dataframe from csv file from data_directory_path.
 
         Args:
-            file_in_data_dir (string): path to csv file in data_directory_path.
+            path_in_data_dir (string): path to csv file or directory with csv files in data_directory_path.
             header (bool): does csv have header as first row.
 
         Returns:
             pyspark.sql.DataFrame: dataframe from csv file.
         """
 
-        source_path = self.__data_directory_path + file_in_data_dir
+        source_path = self.__data_directory_path + path_in_data_dir
         data_frame = self.__spark_session.read.csv(source_path, header=header)
         return data_frame
 
