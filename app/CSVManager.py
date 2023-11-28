@@ -19,8 +19,8 @@ class CSVManager:
 
         Args:
             path_in_data_dir (string): path to csv file or directory with csv files in data_directory_path.
-            header (bool): does csv have header as first row.
             schema: schema for dataset
+            header (bool): does csv have header as first row.
 
         Returns:
             pyspark.sql.DataFrame: dataframe from csv file.
