@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark import SparkConf
 
 from settings import DATA_DIRECTORY_PATH, TRIP_FARE_PATH, TRIP_DATA_PATH
-from app.read_write import CSVManager
+from app.CSVManager import CSVManager
 
 
 def main():

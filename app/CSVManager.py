@@ -25,7 +25,7 @@ class CSVManager:
             pyspark.sql.DataFrame: dataframe from csv file.
         """
 
-        source_path = self.__data_directory_path + path_in_data_dir
+        source_path = f'{self.__data_directory_path}{path_in_data_dir}'
         data_frame = self.__spark_session.read.csv(source_path, header=header)
         return data_frame
 
@@ -37,5 +37,5 @@ class CSVManager:
             directory_path_in_data_dir (string): path to result directory in data_directory_path.
         """
 
-        directory_to_save_path = self.__data_directory_path + directory_path_in_data_dir
+        directory_to_save_path = f'{self.__data_directory_path}{directory_path_in_data_dir}'
         data_frame.write.csv(directory_to_save_path, header=True)
