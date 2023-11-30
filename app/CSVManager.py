@@ -28,9 +28,9 @@ class CSVManager:
 
         source_path = f'{self.__data_directory_path}{path_in_data_dir}'
         if schema:
-            data_frame = self.__spark_session.read.csv(source_path, schema=schema, header=header)
+            data_frame = self.__spark_session.read.csv(source_path, schema=schema)
         else:
-            data_frame = self.__spark_session.read.csv(source_path, header=header)
+            data_frame = self.__spark_session.read.csv(source_path)
         return data_frame
 
     def write(self, data_frame, directory_path_in_data_dir):
