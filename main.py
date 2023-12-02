@@ -2,6 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark import SparkConf
 from settings import DATA_DIRECTORY_PATH, TRIP_FARE_PATH, TRIP_DATA_PATH
 from app.CSVManager import CSVManager
+from app.column_info import describe_string_col, describe_numeric_col
 from schemas import trip_data_schema, trip_fare_schema
 
 
@@ -17,10 +18,14 @@ def main():
     trip_fare_df = csv_manager.read(TRIP_FARE_PATH, trip_fare_schema)
     trip_fare_df.show(20)
     print(trip_fare_df.schema)
-
     trip_data_df = csv_manager.read(TRIP_DATA_PATH, trip_data_schema)
     print(trip_data_df.schema)
     trip_data_df.show(20)
+
+    describe_numeric_col(trip_fare_df, 'fare_amount')
+    describe_numeric_col(trip_fare_df, 'surcharge')
+    describe_string_col(trip_fare_df, 'medallion')
+    describe_string_col(trip_fare_df, 'hack_license')
 
 
 if __name__ == '__main__':
