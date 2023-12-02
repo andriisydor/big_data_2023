@@ -19,7 +19,7 @@ class CSVManager:
 
         Args:
             path_in_data_dir (string): path to csv file or directory with csv files in data_directory_path.
-            schema: schema for dataset
+            schema (pyspark.sql.types.StructType): schema for dataset
             header (bool): does csv have header as first row.
 
         Returns:

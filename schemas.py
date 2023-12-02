@@ -4,16 +4,16 @@ from pyspark.sql.types import (StructType, StructField,
 
 trip_fare_schema = StructType([
         StructField("medallion", StringType(), True),
-        StructField("hack_license", StringType(), True),
-        StructField("vendor_id", StringType(), True),
-        StructField("pickup_datetime", TimestampType(), True),
-        StructField("payment_type", StringType(), True),
-        StructField("fare_amount", DoubleType(), True),
-        StructField("surcharge", DoubleType(), True),
-        StructField("mta_tax", DoubleType(), True),
-        StructField("tip_amount", DoubleType(), True),
-        StructField("tolls_amount", DoubleType(), True),
-        StructField("total_amount", DoubleType(), True)
+        StructField(" hack_license", StringType(), True),
+        StructField(" vendor_id", StringType(), True),
+        StructField(" pickup_datetime", TimestampType(), True),
+        StructField(" payment_type", StringType(), True),
+        StructField(" fare_amount", DoubleType(), True),
+        StructField(" surcharge", DoubleType(), True),
+        StructField(" mta_tax", DoubleType(), True),
+        StructField(" tip_amount", DoubleType(), True),
+        StructField(" tolls_amount", DoubleType(), True),
+        StructField(" total_amount", DoubleType(), True)
     ])
 
 
