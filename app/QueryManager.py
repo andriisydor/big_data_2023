@@ -9,5 +9,6 @@ class QueryManager:
     def trips_count(self, dataframe: DataFrame, date_column):
         dataframe = dataframe.withColumn("dayofweek",
                                          date_format(dataframe[date_column], "EEEE"))
-        trips_by_week = dataframe.groupBy("vendor_id", "dayofweek").count().orderBy(desc("count"))
+        trips_by_week = (dataframe.filter(col("vendor_id") != "None").groupBy("vendor_id", "dayofweek").
+                         count().orderBy(desc("vendor_id"), desc("count")))
         return trips_by_week
