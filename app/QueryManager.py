@@ -1,5 +1,5 @@
 from pyspark.sql import Window
-from pyspark.sql.functions import col, date_format, desc, max
+from pyspark.sql.functions import col, date_format, desc, max, sum, format_number
 
 
 class QueryManager:
@@ -29,3 +29,9 @@ class QueryManager:
                                                                                               "vendor_id")))
                          .filter(col("count") == col("max_trip_count")).drop("max_trip_count"))
         return trips_by_week
+
+    def total_revenue(self):
+        """ Calculates the total revenue of each vendor """
+        dataframe = (self.trip_fare_df.filter(col("vendor_id") != "None").groupBy("vendor_id")
+                     .agg(format_number(sum("total_amount"), 2).alias("total revenue")))
+        return dataframe
