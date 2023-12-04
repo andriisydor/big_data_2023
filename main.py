@@ -14,10 +14,11 @@ from app.QueryManager import QueryManager
 def business_questions(spark, trip_fare_df, trip_data_df):
     """all business methods will be invoked here """
     query_manager = QueryManager(spark, trip_fare_df, trip_data_df)
-    result1 = query_manager.trips_count(trip_fare_df, "pickup_datetime")
-    result2 = query_manager.trips_count(trip_data_df, "pickup_datetime")
-    result1.show(20)
-    result2.show(20)
+    # Which day of the week has the highest number of trips?
+    trips_fare_by_week = query_manager.trips_count(trip_fare_df, "pickup_datetime")
+    trips_data_by_week = query_manager.trips_count(trip_data_df, "pickup_datetime")
+    trips_fare_by_week.show(20)
+    trips_data_by_week.show(20)
 
 
 def info(trip_fare_df):

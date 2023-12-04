@@ -15,10 +15,10 @@ class QueryManager:
             dataframe: pyspark.sql.DataFrame
             date_column: desired date column in dataframe
         Returns:
-            dataframe which has two columns
+            dataframe which has three columns
             1. Vendor_ID
             2. Day of Week
-            3. Max_trips
+            3. Count (count of trips)
         """
         trip_df = dataframe.withColumn("dayofweek",
                                        date_format(dataframe[date_column], "EEEE"))
