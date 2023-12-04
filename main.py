@@ -12,6 +12,7 @@ from app.QueryManager import QueryManager
 
 
 def business_questions(spark, trip_fare_df, trip_data_df):
+    """all business methods will be invoked here """
     query_manager = QueryManager(spark, trip_fare_df, trip_data_df)
     result1 = query_manager.trips_count(trip_fare_df, "pickup_datetime")
     result2 = query_manager.trips_count(trip_data_df, "pickup_datetime")
@@ -20,13 +21,15 @@ def business_questions(spark, trip_fare_df, trip_data_df):
 
 
 def info(trip_fare_df):
+    """ Prints info of trip_fare_df"""
     number_of_rows_to_show = 20
     print(f'Rows count: {trip_fare_df.count()}')
     trip_fare_df.show(number_of_rows_to_show)
     print(f'Dataframe schema: {trip_fare_df.schema}')
     trip_fare_df.describe().show()
     trip_fare_df.summary().show()
-    pickup_datetime_min, pickup_datetime_max = timestamp_column_min_and_max(trip_fare_df, columns.pickup_datetime)
+    pickup_datetime_min, pickup_datetime_max = (
+        timestamp_column_min_and_max(trip_fare_df, columns.pickup_datetime))
     print(f'pickup_datetime min: {pickup_datetime_min}, max: {pickup_datetime_max}')
 
 
