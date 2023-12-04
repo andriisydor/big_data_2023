@@ -1,24 +1,30 @@
 """ Contains tools to analise dataset columns. """
 
+import pyspark.sql.functions as f
 
-def describe_numeric_col(df, col_name):
-    column_summary = df.select(col_name).summary()  # collects main info about column (min, max, avg, etc.)
+
+def show_column_summary(dataframe, column_name):
+    column_summary = dataframe.select(column_name).summary()  # collects main info about column (min, max, avg, etc.)
     column_summary.show()
-    nulls_count = df.filter(df[col_name].isNull()).count()  # counts number of null vals
-    print(f'Number of null vals in {col_name} = {nulls_count}')
 
 
-def describe_string_col(df, col_name):
-    unique_values_counts = (df.groupBy(col_name).count())   # finds all unique vals and counts them in df
+def get_null_count(dataframe, column_name):
+    null_count = dataframe.filter(dataframe[column_name].isNull()).count()  # counts number of null vals
+    return null_count
+
+
+def show_null_rows(dataframe, column_name):
+    dataframe.filter(f.col(column_name).isNull()).show()
+
+
+def show_unique_vals(dataframe, column_name):
+    unique_values_counts = (dataframe.groupBy(column_name).count())  # finds all unique vals and counts them in df
     unique_values_counts.show(truncate=False)
-    print(f'Number of unique {col_name} = {unique_values_counts.count()}')  # counts number of unique vals
-    nulls_count = df.filter(df[col_name].isNull()).count()  # counts number of null vals
-    print(f'Number of null vals in {col_name} = {nulls_count}')
 
 
 def timestamp_column_min_and_max(dataframe, column_name):
-    min_timestamp = dataframe.select(column_name).agg({column_name: "min"}).head()[0]
-    max_timestamp = dataframe.select(column_name).agg({column_name: "max"}).head()[0]
+    min_timestamp = dataframe.select(column_name).agg({column_name: 'min'}).head()[0]
+    max_timestamp = dataframe.select(column_name).agg({column_name: 'max'}).head()[0]
     return min_timestamp, max_timestamp
 
 
