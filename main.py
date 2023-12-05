@@ -44,7 +44,6 @@ def main():
     show_string_column_info(trip_fare_df, columns.medallion)
     show_string_column_info(trip_fare_df, columns.hack_license)
 
-    # apply transformation: remove dublicates and rows with NULL values
     trip_fare_df = clean_dataframe(trip_fare_df)
     trip_data_df = clean_dataframe(trip_data_df)
 

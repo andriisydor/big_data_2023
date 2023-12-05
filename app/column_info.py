@@ -31,12 +31,29 @@ def show_string_column_info(dataframe, column_name):
 
 
 def show_column_summary(dataframe, column_name):
-    column_summary = dataframe.select(column_name).summary()  # collects main info about column (min, max, avg, etc.)
+    """
+    Collects main info about column (min, max, avg, etc.).
+
+    Args:
+        dataframe (pyspark.sql.DataFrame): dataframe which column will be analyzed
+        column_name: analyzed column
+    """
+    column_summary = dataframe.select(column_name).summary()
     column_summary.show()
 
 
 def get_null_count(dataframe, column_name):
-    null_count = dataframe.filter(dataframe[column_name].isNull()).count()  # counts number of null vals
+    """
+    Counts number of null values in column of dataframe.
+
+    Args:
+        dataframe (pyspark.sql.DataFrame): dataframe which column will be analyzed
+        column_name: analyzed column
+
+    Returns:
+        null_count (int): number of Null values in column
+    """
+    null_count = dataframe.filter(dataframe[column_name].isNull()).count()
     return null_count
 
 
@@ -45,7 +62,14 @@ def show_null_rows(dataframe, column_name):
 
 
 def show_unique_vals(dataframe, column_name):
-    unique_values_counts = (dataframe.groupBy(column_name).count())  # finds all unique vals and counts them in df
+    """
+    Finds all unique values in column of dataframe and shows them.
+
+    Args:
+        dataframe (pyspark.sql.DataFrame): dataframe which column will be analyzed
+        column_name: analyzed column
+    """
+    unique_values_counts = (dataframe.groupBy(column_name).count())
     unique_values_counts.show(truncate=False)
 
 
