@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
+
 from settings import DATA_DIRECTORY_PATH, TRIP_FARE_PATH, TRIP_DATA_PATH
 from schemas import trip_data_schema, trip_fare_schema
 
@@ -8,6 +9,17 @@ from app import columns
 from app.column_info import show_string_column_info, show_digit_column_info, \
                             show_dataframe_main_info, show_datetime_column_info
 from app.transformations import strip_names_of_columns, clean_dataframe
+from app.QueryManager import QueryManager
+
+
+def business_questions(spark, trip_fare_df, trip_data_df):
+    """all business methods will be invoked here """
+    query_manager = QueryManager(spark, trip_fare_df, trip_data_df)
+    # Which day of the week has the highest number of trips?
+    trips_fare_by_week = query_manager.trips_count(trip_fare_df, "pickup_datetime")
+    trips_data_by_week = query_manager.trips_count(trip_data_df, "pickup_datetime")
+    trips_fare_by_week.show(20)
+    trips_data_by_week.show(20)
 
 
 def main():
@@ -34,6 +46,8 @@ def main():
 
     # apply transformation: remove dublicates and rows with NULL values
     trip_fare_df = clean_dataframe(trip_fare_df)
+
+    business_questions(spark_session, trip_fare_df, trip_data_df)
 
 
 if __name__ == '__main__':
