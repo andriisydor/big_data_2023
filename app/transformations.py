@@ -15,3 +15,19 @@ def strip_names_of_columns(dataframe):
     for old_name, new_name in zip(dataframe.columns, correct_names_of_columns):
         dataframe = dataframe.withColumnRenamed(old_name, new_name)
     return dataframe
+
+
+def clean_dataframe(dataframe):
+    """
+    Removes duplicate rows and rows with NULL values from the dataframe.
+
+    Args:
+        dataframe (pyspark.sql.DataFrame): dataframe which rows will be dropped.
+
+    Returns:
+        pyspark.sql.DataFrame
+    """
+    dataframe = dataframe.dropDuplicates()
+    dataframe = dataframe.dropna()
+
+    return dataframe

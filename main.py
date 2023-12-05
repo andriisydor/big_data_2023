@@ -6,8 +6,9 @@ from schemas import trip_data_schema, trip_fare_schema
 
 from app.CSVManager import CSVManager
 from app import columns
-from app.column_info import timestamp_column_min_and_max
-from app.transformations import strip_names_of_columns
+from app.column_info import show_string_column_info, show_digit_column_info, \
+                            show_dataframe_main_info, show_datetime_column_info
+from app.transformations import strip_names_of_columns, clean_dataframe
 from app.QueryManager import QueryManager
 
 
@@ -21,19 +22,6 @@ def business_questions(spark, trip_fare_df, trip_data_df):
     trips_data_by_week.show(20)
 
 
-def info(trip_fare_df):
-    """ Prints info of trip_fare_df"""
-    number_of_rows_to_show = 20
-    print(f'Rows count: {trip_fare_df.count()}')
-    trip_fare_df.show(number_of_rows_to_show)
-    print(f'Dataframe schema: {trip_fare_df.schema}')
-    trip_fare_df.describe().show()
-    trip_fare_df.summary().show()
-    pickup_datetime_min, pickup_datetime_max = (
-        timestamp_column_min_and_max(trip_fare_df, columns.pickup_datetime))
-    print(f'pickup_datetime min: {pickup_datetime_min}, max: {pickup_datetime_max}')
-
-
 def main():
     spark_session = (SparkSession.builder
                      .master('local')
@@ -45,10 +33,20 @@ def main():
 
     trip_fare_df = csv_manager.read(TRIP_FARE_PATH, trip_fare_schema)
     trip_fare_df = strip_names_of_columns(trip_fare_df)
-    # info(trip_fare_df)
+    number_of_rows_to_show = 20
+
     trip_data_df = csv_manager.read(TRIP_DATA_PATH, trip_data_schema)
-    trip_fare_df = trip_fare_df.dropDuplicates()
-    trip_fare_df = trip_fare_df.dropna()
+
+    show_dataframe_main_info(trip_fare_df, number_of_rows_to_show)
+    show_datetime_column_info(trip_fare_df, columns.pickup_datetime)
+    show_digit_column_info(trip_fare_df, columns.fare_amount)
+    show_digit_column_info(trip_fare_df, columns.surcharge)
+    show_string_column_info(trip_fare_df, columns.medallion)
+    show_string_column_info(trip_fare_df, columns.hack_license)
+
+    trip_fare_df = clean_dataframe(trip_fare_df)
+    trip_data_df = clean_dataframe(trip_data_df)
+
     business_questions(spark_session, trip_fare_df, trip_data_df)
 
 
