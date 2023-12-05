@@ -46,6 +46,7 @@ def main():
 
     # apply transformation: remove dublicates and rows with NULL values
     trip_fare_df = clean_dataframe(trip_fare_df)
+    trip_data_df = clean_dataframe(trip_data_df)
 
     business_questions(spark_session, trip_fare_df, trip_data_df)
 
