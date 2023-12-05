@@ -3,6 +3,33 @@
 import pyspark.sql.functions as f
 
 
+def show_dataframe_main_info(dataframe, number_of_rows_to_show):
+    print(f'Rows count: {dataframe.count()}')
+    dataframe.show(number_of_rows_to_show)
+    print(f'Dataframe schema: {dataframe.schema}')
+    dataframe.describe().show()
+    dataframe.summary().show()
+
+
+def show_datetime_column_info(dataframe, column_name):
+    min_val, max_val = timestamp_column_min_and_max(dataframe, column_name)
+    print(f'{column_name} min: {min_val}, max: {max_val}')
+
+
+def show_digit_column_info(dataframe, column_name):
+    show_column_summary(dataframe, column_name)
+    null_count = get_null_count(dataframe, column_name)
+    print(f'Number of null vals in {column_name}: {null_count}')
+
+
+def show_string_column_info(dataframe, column_name):
+    show_unique_vals(dataframe, column_name)
+    null_count = get_null_count(dataframe, column_name)
+    print(f'Number of null vals in {column_name}: {null_count}')
+    unique_count = number_of_unique_values_of_column(dataframe, column_name)
+    print(f'Number of unique vals in {column_name}: {unique_count}')
+
+
 def show_column_summary(dataframe, column_name):
     column_summary = dataframe.select(column_name).summary()  # collects main info about column (min, max, avg, etc.)
     column_summary.show()
