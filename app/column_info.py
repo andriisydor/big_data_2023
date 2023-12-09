@@ -2,8 +2,8 @@
 
 
 def timestamp_column_min_and_max(dataframe, column_name):
-    min_timestamp = dataframe.select(column_name).agg({column_name: "min"}).head()[0]
-    max_timestamp = dataframe.select(column_name).agg({column_name: "max"}).head()[0]
+    min_timestamp = dataframe.select(column_name).agg({column_name: 'min'}).head()[0]
+    max_timestamp = dataframe.select(column_name).agg({column_name: 'max'}).head()[0]
     return min_timestamp, max_timestamp
 
 
