@@ -33,7 +33,7 @@ class QueryManager:
     def total_revenue(self):
         """ Calculates the total revenue of each vendor """
         dataframe = (self.trip_fare_df.filter(col(columns.vendor_id) != 'None').groupBy(columns.vendor_id)
-                     .agg(format_number(sum('total_amount'), 2).alias('total revenue')))
+                     .agg(format_number(sum(columns.total_amount), 2).alias('total revenue')))
         return dataframe
 
     def avg_trip_distance(self):
@@ -46,10 +46,10 @@ class QueryManager:
     def simultaneous_trips(self):
         """ Calculates how many trips happened simultaneously """
         pickup_dataframe = (self.trip_data_df.filter(col(columns.pickup_datetime).isNotNull()).
-                            select(col('pickup_datetime').alias('event_time'),
+                            select(col(columns.pickup_datetime).alias('event_time'),
                                    lit(1).alias('event_count')))
         dropoff_dateframe = (self.trip_data_df.filter(col(columns.dropoff_datetime).isNotNull()).
-                             select(col('dropoff_datetime').alias('event_time'),
+                             select(col(columns.dropoff_datetime).alias('event_time'),
                                     lit(-1).alias('event_count')))
         event_dateframe = pickup_dataframe.union(dropoff_dateframe)
         dataframe = event_dateframe.withColumn('sum', sum('event_count').over(Window.partitionBy('event_time')
@@ -66,7 +66,7 @@ class QueryManager:
         return dataframe
 
     def avg_amount_rate_code(self):
-        """ Calculates the tip above average tip amount for trips with different rate code. """
+        """ Calculates count of trips the tip above average tip amount for trips with different rate code. """
         dataframe = self.trip_fare_df.join(
                     self.trip_data_df,
                     [self.trip_data_df[columns.medallion] == self.trip_fare_df[columns.medallion],
@@ -74,10 +74,11 @@ class QueryManager:
                      self.trip_data_df[columns.pickup_datetime] == self.trip_fare_df[columns.pickup_datetime]],
                     'inner'
                 )
-        average_tip_amounts = dataframe.groupBy('rate_code').agg(avg('tip_amount').alias('avg_tip_amount'))
-        joined_data = dataframe.join(average_tip_amounts, on='rate_code', how='inner')
+        average_tip_amounts = dataframe.groupBy(columns.rate_code).agg(avg(columns.tip_amount).alias('avg_tip_amount'))
+        joined_data = dataframe.join(average_tip_amounts, on=columns.rate_code, how='inner')
         dataframe = joined_data.withColumn('tip_above_avg', col('tip_amount') > col('avg_tip_amount'))
-        dataframe = dataframe.groupBy(self.trip_data_df['vendor_id']).count().withColumnRenamed('count', 'trip_count')
-        dataframe.show()
+        dataframe = (dataframe.groupBy(columns.rate_code).count().withColumnRenamed('count', 'trip_count').
+                     orderBy(desc('trip_count')))
+        return dataframe
 
 
