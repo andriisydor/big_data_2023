@@ -157,3 +157,16 @@ class QueryManager:
                      .select(column_date, columns.hack_license, columns.vendor_id, column_tips_sum)
         )
         return drivers
+
+    def price_per_second_of_drive_for_each_vendor(self):
+        column_average_fare_per_second = 'average_fare_per_second'
+        join_column_names = [columns.vendor_id, columns.medallion, columns.hack_license, columns.pickup_datetime]
+        joined_df = self.trip_fare_df.join(self.trip_data_df, join_column_names, 'inner')
+        price_per_second_of_drive_for_each_vendor = (
+            joined_df.groupBy('vendor_id')
+                     .agg({columns.fare_amount: 'sum', columns.trip_time_in_secs: 'sum'})
+                     .withColumn(column_average_fare_per_second,
+                                 f.col('sum(fare_amount)') / f.col('sum(trip_time_in_secs)'))
+                     .select(columns.vendor_id, column_average_fare_per_second)
+        )
+        return price_per_second_of_drive_for_each_vendor

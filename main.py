@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
-from settings import DATA_DIRECTORY_PATH, TRIP_FARE_PATH, TRIP_DATA_PATH, OUTPUT_DIRECTORY, ANDRII_DIRECTORY
+from settings import DATA_DIRECTORY_PATH, TRIP_FARE_PATH, TRIP_DATA_PATH, OUTPUT_DIRECTORY
 from schemas import trip_data_schema, trip_fare_schema
 from app.CSVManager import CSVManager
 from app import columns
@@ -30,16 +30,17 @@ def business_questions(query_manager, csv_manager, output_directory):
     dataframe = query_manager.avg_amount_rate_code()
     dataframe.show()
 
-    andrii_output_path = f'{output_directory}{ANDRII_DIRECTORY}'
-
-    trips_with_tip_greater_than_fare = query_manager.trips_with_tip_mount_greater_than_fare_amount()
-    csv_manager.write(trips_with_tip_greater_than_fare, f'{andrii_output_path}/trips_with_tip_greater_than_fare')
-
-    earnings_of_each_vendor = query_manager.total_earnings_of_each_vendor_for_first_seven_days_of_january()
-    csv_manager.write(earnings_of_each_vendor, f'{andrii_output_path}/earnings_of_each_vendor')
+    # trips_with_tip_greater_than_fare = query_manager.trips_with_tip_mount_greater_than_fare_amount()
+    # csv_manager.write(trips_with_tip_greater_than_fare, f'{output_directory}/trips_with_tip_greater_than_fare')
+    #
+    # earnings_of_each_vendor = query_manager.total_earnings_of_each_vendor_for_first_seven_days_of_january()
+    # csv_manager.write(earnings_of_each_vendor, f'{output_directory}/earnings_of_each_vendor')
 
     # driver_of_each_day = query_manager.driver_of_each_day()
-    # csv_manager.write(driver_of_each_day, f'{andrii_output_path}/driver_of_each_day')
+    # csv_manager.write(driver_of_each_day, f'{output_directory}/driver_of_each_day')
+
+    price_per_second_of_drive = query_manager.price_per_second_of_drive_for_each_vendor()
+    csv_manager.write(price_per_second_of_drive, f'{output_directory}/price_per_second_of_drive')
 
 
 def main():
