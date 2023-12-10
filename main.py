@@ -1,9 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
-
 from settings import DATA_DIRECTORY_PATH, TRIP_FARE_PATH, TRIP_DATA_PATH
 from schemas import trip_data_schema, trip_fare_schema
-
 from app.CSVManager import CSVManager
 from app import columns
 from app.column_info import show_string_column_info, show_digit_column_info, \
@@ -15,11 +13,23 @@ from app.QueryManager import QueryManager
 def business_questions(spark, trip_fare_df, trip_data_df):
     """all business methods will be invoked here """
     query_manager = QueryManager(spark, trip_fare_df, trip_data_df)
-    # Which day of the week has the highest number of trips?
-    trips_fare_by_week = query_manager.trips_count(trip_fare_df, "pickup_datetime")
-    trips_data_by_week = query_manager.trips_count(trip_data_df, "pickup_datetime")
-    trips_fare_by_week.show(20)
-    trips_data_by_week.show(20)
+    ## Which day of the week has the highest number of trips?
+    trips_by_week = query_manager.trips_count(columns.pickup_datetime)
+    trips_by_week.show(20)
+    ## What is the total revenue earned by each vendor?
+    total_revenue = query_manager.total_revenue()
+    total_revenue.show()
+    ## What is the average trip distance for different passenger counts?
+    query_manager.avg_trip_distance()
+    ## How many simultaneous trips happened during a day
+    simultaneous_trips = query_manager.simultaneous_trips()
+    simultaneous_trips.show()
+    ## Top 5 most expensive trips
+    dataframe = query_manager.most_expensive_trips()
+    dataframe.show()
+    ## Trips which tip amount was greater than average based on rate code
+    dataframe = query_manager.avg_amount_rate_code()
+    dataframe.show()
 
 
 def main():
