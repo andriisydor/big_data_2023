@@ -2,7 +2,6 @@ from pyspark.sql import SparkSession
 from pyspark import SparkConf
 from settings import DATA_DIRECTORY_PATH, TRIP_FARE_PATH, TRIP_DATA_PATH
 from schemas import trip_data_schema, trip_fare_schema
-
 from app.CSVManager import CSVManager
 from app import columns
 from app.column_info import show_string_column_info, show_digit_column_info, \
