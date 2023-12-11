@@ -170,14 +170,17 @@ class QueryManager:
             dataframe with columns:
             vendor_id, average_fare_per_second
         """
+        column_sum_fare_amount = 'sum_fare_amount'
+        column_sum_trip_time_in_secs = 'sum_trip_time_in_secs'
         column_average_fare_per_second = 'average_fare_per_second'
         join_column_names = [columns.vendor_id, columns.medallion, columns.hack_license, columns.pickup_datetime]
         joined_df = self.trip_fare_df.join(self.trip_data_df, join_column_names, 'inner')
         price_per_second_of_drive_for_each_vendor = (
             joined_df.groupBy('vendor_id')
-                     .agg({columns.fare_amount: 'sum', columns.trip_time_in_secs: 'sum'})
+                     .agg(f.sum(columns.fare_amount).alias(column_sum_fare_amount),
+                          f.sum(columns.trip_time_in_secs).alias(column_sum_trip_time_in_secs))
                      .withColumn(column_average_fare_per_second,
-                                 f.col('sum(fare_amount)') / f.col('sum(trip_time_in_secs)'))
+                                 f.col(column_sum_fare_amount) / f.col(column_sum_trip_time_in_secs))
                      .select(columns.vendor_id, column_average_fare_per_second)
         )
         return price_per_second_of_drive_for_each_vendor
@@ -202,3 +205,19 @@ class QueryManager:
                              .select(columns.payment_type, columns.vendor_id, column_sum_total_amount)
          )
         return top_vendor_for_each_payment_type
+
+    def top_five_drivers_with_greatest_sum_of_time_in_trip(self):
+        """ Top 5 drivers with greatest sum of time spent in trips.
+
+        Returns:
+            dataframe with columns:
+            vendor_id, hack_license, sum_trip_time_in_secs
+        """
+        column_sum_trip_time_in_secs = 'sum_trip_time_in_secs'
+        top_five_drivers_with_greatest_sum_of_time_in_trip = (
+            self.trip_data_df.groupBy(columns.vendor_id, columns.hack_license)
+                .agg(f.sum(f.col(columns.trip_time_in_secs)).alias(column_sum_trip_time_in_secs))
+                .orderBy(f.desc(column_sum_trip_time_in_secs))
+        ).limit(5)
+
+        return top_five_drivers_with_greatest_sum_of_time_in_trip
