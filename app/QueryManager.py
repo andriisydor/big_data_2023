@@ -139,7 +139,12 @@ class QueryManager:
         return total_earnings_of_each_vendor_for_first_seven_days_of_january
 
     def driver_of_each_day(self):
-        """
+        """ Driver who received the biggest amount of tips for each day
+        (tips are considered received when the trip is over).
+
+        Returns:
+            dataframe with columns:
+            date, hack_licence, vendor_id, tips_sum.
         """
         column_date = 'date'
         column_tips_sum = 'tips_sum'
@@ -159,6 +164,12 @@ class QueryManager:
         return drivers
 
     def price_per_second_of_drive_for_each_vendor(self):
+        """ Average price per second of drive for each vendor.
+
+        Returns:
+            dataframe with columns:
+            vendor_id, average_fare_per_second
+        """
         column_average_fare_per_second = 'average_fare_per_second'
         join_column_names = [columns.vendor_id, columns.medallion, columns.hack_license, columns.pickup_datetime]
         joined_df = self.trip_fare_df.join(self.trip_data_df, join_column_names, 'inner')
@@ -170,3 +181,24 @@ class QueryManager:
                      .select(columns.vendor_id, column_average_fare_per_second)
         )
         return price_per_second_of_drive_for_each_vendor
+
+    def top_vendor_for_each_payment_type(self):
+        """ Vendor who received the biggest amount of money for each payment type.
+
+        Returns:
+            dataframe with columns:
+            payment_type, vendor_id, sum_total_amount.
+        """
+        column_sum_total_amount = 'sum_total_amount'
+        column_max_for_payment_type = 'max_for_payment_type'
+        top_vendor_for_each_payment_type = (
+            self.trip_fare_df.groupBy(columns.vendor_id, columns.payment_type)
+                             .agg(f.sum(columns.total_amount).alias(column_sum_total_amount))
+                             .orderBy(columns.payment_type, f.desc(column_sum_total_amount))
+                             .withColumn(column_max_for_payment_type,
+                                         f.max(f.col(column_sum_total_amount))
+                                         .over(Window.partitionBy(columns.payment_type)))
+                             .filter(f.col(column_sum_total_amount) == f.col(column_max_for_payment_type))
+                             .select(columns.payment_type, columns.vendor_id, column_sum_total_amount)
+         )
+        return top_vendor_for_each_payment_type
