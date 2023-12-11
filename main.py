@@ -30,17 +30,23 @@ def business_questions(query_manager, csv_manager, output_directory):
     dataframe = query_manager.avg_amount_rate_code()
     dataframe.show()
 
-    # trips_with_tip_greater_than_fare = query_manager.trips_with_tip_mount_greater_than_fare_amount()
-    # csv_manager.write(trips_with_tip_greater_than_fare, f'{output_directory}/trips_with_tip_greater_than_fare')
-    #
-    # earnings_of_each_vendor = query_manager.total_earnings_of_each_vendor_for_first_seven_days_of_january()
-    # csv_manager.write(earnings_of_each_vendor, f'{output_directory}/earnings_of_each_vendor')
+    trips_with_tip_greater_than_fare = query_manager.trips_with_tip_mount_greater_than_fare_amount()
+    csv_manager.write(trips_with_tip_greater_than_fare, f'{output_directory}/trips_with_tip_greater_than_fare')
 
-    # driver_of_each_day = query_manager.driver_of_each_day()
-    # csv_manager.write(driver_of_each_day, f'{output_directory}/driver_of_each_day')
+    earnings_of_each_vendor = query_manager.total_earnings_of_each_vendor_for_first_seven_days_of_january()
+    csv_manager.write(earnings_of_each_vendor, f'{output_directory}/earnings_of_each_vendor')
+
+    driver_of_each_day = query_manager.driver_of_each_day()
+    csv_manager.write(driver_of_each_day, f'{output_directory}/driver_of_each_day')
 
     price_per_second_of_drive = query_manager.price_per_second_of_drive_for_each_vendor()
     csv_manager.write(price_per_second_of_drive, f'{output_directory}/price_per_second_of_drive')
+
+    top_vendor_for_each_payment_type = query_manager.top_vendor_for_each_payment_type()
+    csv_manager.write(top_vendor_for_each_payment_type, f'{output_directory}/top_vendor_for_each_payment_type')
+
+    time_in_trip_top_drivers = query_manager.top_five_drivers_with_greatest_sum_of_time_in_trip()
+    csv_manager.write(time_in_trip_top_drivers, f'{output_directory}/time_in_trip_top_drivers')
 
 
 def main():
