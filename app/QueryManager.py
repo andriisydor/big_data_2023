@@ -92,12 +92,112 @@ class QueryManager:
         """
         dataframe = self.trip_fare_df.join(self.trip_data_df, ['medallion', 'hack_license', 'vendor_id',
                                                                'pickup_datetime'], 'inner')
+
         average_tip_amounts = dataframe.groupBy(columns.rate_code).agg(f.avg(columns.tip_amount)
                                                                         .alias('avg_tip_amount'))
+
         joined_data = dataframe.join(average_tip_amounts, on=columns.rate_code, how='inner')
         dataframe = joined_data.withColumn('tip_above_avg', f.col('tip_amount') > f.col('avg_tip_amount'))
         dataframe = (dataframe.groupBy(columns.rate_code).count().withColumnRenamed('count', 'trip_count').
                      orderBy(f.desc('trip_count')))
+        return dataframe
+
+    def tips_count(self):
+        """ Identifies the specific day of the week when each vendor tends to receive the highest amount of tips.
+
+        Returns:
+            DataFrame: A DataFrame containing the day of the week and the corresponding highest amount of tips received
+            for each vendor.
+        """
+        window_spec = Window.partitionBy(columns.vendor_id).orderBy(f.col("total_tips").desc())
+
+        dataframe = (self.trip_fare_df.withColumn("day_of_week", f.date_format(columns.pickup_datetime, 'EEEE'))
+                         .groupBy(columns.vendor_id, "day_of_week")
+                         .agg(f.format_number(f.sum(columns.tip_amount), 2).alias("total_tips"))
+                         .withColumn("rank", f.row_number().over(window_spec))
+                         .filter(f.col("rank") == 1)
+                         .select(columns.vendor_id, "day_of_week", "total_tips"))
+
+        return dataframe
+
+    def avg_fare_amount_payment(self):
+        """ Calculates the average fare amount for each payment type.
+
+        Returns:
+            DataFrame: A DataFrame containing the average fare amount for each payment type.
+        """
+        dataframe = (self.trip_fare_df.groupBy(columns.payment_type)
+                         .agg(f.format_number(f.avg(columns.fare_amount), 2).alias("average_fare_amount"))
+                         .orderBy(f.desc("average_fare_amount")))
+
+        return dataframe
+
+    def top_vendor_drivers(self):
+        """ Identifies the top 10 drivers for each vendor based on average trip distance and total tip amount.
+
+        Returns:
+            DataFrame: A DataFrame containing the vendor ID, unique driver license, average mileage covered, total tip
+            amount received and the corresponding rank.
+        """
+        joined_df = (self.trip_data_df.withColumnRenamed(columns.vendor_id, "vendor")
+                                      .join(self.trip_fare_df, [columns.hack_license, columns.pickup_datetime],
+                                            'inner'))
+
+        window_spec = Window.partitionBy("vendor").orderBy(f.desc("average mileage"), f.desc("total tip amount"))
+        dataframe = (joined_df.groupBy(["vendor", columns.hack_license])
+                              .agg(f.format_number(f.avg(columns.trip_distance), 2).alias('average mileage'),
+                                   f.format_number(f.sum(columns.tip_amount), 2).alias('total tip amount'))
+                              .withColumn("rank", f.rank().over(window_spec))
+                              .filter(f.col("rank") <= 10))
+
+        return dataframe
+
+    def percentage_long_trips(self):
+        """ Calculates the percentage of trips with a duration greater than 30 minutes for each vendor.
+
+        Returns:
+            DataFrame: A DataFrame containing the vendor ID, total trips executed for each vendor, amount of trips whose
+            duration greater than 30 minutes and percentage of these trips.
+        """
+        dataframe = (self.trip_data_df.filter(f.col(columns.vendor_id) != 'None')
+                                      .groupBy(columns.vendor_id)
+                                      .agg(f.count("*").alias("total_trips"),
+                                           f.count(f.when(f.col(columns.trip_time_in_secs) > 1800, True))
+                                           .alias("long_trips"))
+                                      .withColumn("percentage_long_trips",
+                                                  f.format_number((f.col("long_trips") /
+                                                                   f.col("total_trips")) * 100, 2)))
+
+        return dataframe
+
+    def top_tips_in_cash(self):
+        """ Calculates top 5 biggest tips for each vendor if the user paid in cash.
+
+        Returns:
+            DataFrame: A DataFrame containing the vendor ID and top 5 largest tips paid in cash for each vendor.
+        """
+        window_spec = Window.partitionBy(columns.vendor_id).orderBy(f.desc(columns.tip_amount))
+        dataframe = (self.trip_fare_df.filter(f.col(columns.payment_type) == "CSH")
+                                      .withColumn("rank", f.dense_rank().over(window_spec))
+                                      .filter(f.col("rank") <= 5).select(columns.vendor_id, columns.tip_amount, "rank"))
+
+        return dataframe
+
+    def trips_weekdays_weekend(self):
+        """ Calculates the number of trips occurred on weekend and weekdays for each vendor.
+
+        Returns:
+            DataFrame: A DataFrame containing the number of trips executed on weekdays and weekends for each vendor.
+        """
+        weekdays = [2, 3, 4, 5, 6]
+
+        dataframe = self.trip_fare_df.withColumn("day_of_week", f.dayofweek(f.col(columns.pickup_datetime)))
+        dataframe = (dataframe.withColumn("day_type", f.when(f.col("day_of_week")
+                                                              .isin(weekdays), "weekday").otherwise("weekend"))
+                              .groupBy(columns.vendor_id, "day_type")
+                              .count()
+                              .orderBy(columns.vendor_id, "day_type"))
+
         return dataframe
 
     def trips_with_tip_mount_greater_than_fare_amount(self):
