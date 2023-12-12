@@ -197,3 +197,55 @@ class QueryManager:
                               .orderBy(columns.vendor_id, "day_type"))
 
         return dataframe
+
+    def most_popular_payment_type(self):
+        """
+        Calculates the most popular payment type.
+
+        Returns:
+            DataFrame: A DataFrame containing only one row with the most popular payment type.
+        """
+
+        dataframe = (
+            self.trip_fare_df.groupBy(columns.payment_type)
+                .count()
+                .orderBy('count', ascending=False)
+                .limit(1)
+        )
+
+        return dataframe
+
+    def highest_fare_amount(self):
+        """
+        Calculates the highest fare when vendor is VTS.
+
+        Returns:
+            DataFrame: A DataFrame containing only one row with the highest fare amount for VTS.
+        """
+
+        dataframe = (
+            self.trip_fare_df.filter(f.col(columns.vendor_id) == 'VTS')
+                .orderBy(columns.fare_amount, ascending=False)
+                .limit(1)
+        )
+
+        return dataframe
+
+    def top_total_amount(self):
+        """
+        Calculates the top 10 total_amount values for drivers when passengers count > 5.
+
+        Returns:
+            DataFrame: A DataFrame containing 10 rows with biggest total_amount values for drivers
+            when passengers count > 5.
+        """
+        dataframe = (
+            self.trip_fare_df.join(self.trip_data_df, [columns.medallion, columns.hack_license])
+                .filter(f.col(columns.passenger_count) > 5)
+                .groupBy(columns.medallion, columns.hack_license, columns.passenger_count)
+                .agg(f.max(columns.total_amount))
+                .orderBy(f.col(f'max({columns.total_amount})'), ascending=False)
+                .limit(10)
+        )
+
+        return dataframe
