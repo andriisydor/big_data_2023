@@ -72,6 +72,30 @@ def business_questions(query_manager, csv_manager, output_directory):
     csv_manager.write(trips_weekdays_weekend, f'{output_directory}/trips_weekdays_weekend')
     trips_weekdays_weekend.show()
 
+    most_popular_payment_type = query_manager.most_popular_payment_type()
+    csv_manager.write(most_popular_payment_type, f'{output_directory}/most_popular_payment_type')
+    most_popular_payment_type.show()
+
+    highest_fare_amount = query_manager.highest_fare_amount()
+    csv_manager.write(highest_fare_amount, f'{output_directory}/highest_fare_amount')
+    highest_fare_amount.show()
+
+    top_total_amount = query_manager.top_total_amount()
+    csv_manager.write(top_total_amount, f'{output_directory}/top_total_amount')
+    top_total_amount.show()
+
+    total_revenue_per_day = query_manager.total_revenue_per_day()
+    csv_manager.write(total_revenue_per_day, f'{output_directory}/total_revenue_per_day')
+    total_revenue_per_day.show()
+
+    tip_percentage = query_manager.tip_percentage()
+    csv_manager.write(tip_percentage, f'{output_directory}/tip_percentage')
+    tip_percentage.show()
+
+    avg_trip_duration = query_manager.avg_trip_duration()
+    csv_manager.write(avg_trip_duration, f'{output_directory}/avg_trip_duration')
+    avg_trip_duration.show()
+
 
 def main():
     spark_session = (SparkSession.builder

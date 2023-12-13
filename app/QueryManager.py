@@ -321,3 +321,111 @@ class QueryManager:
         ).limit(5)
 
         return top_five_drivers_with_greatest_sum_of_time_in_trip
+
+    def most_popular_payment_type(self):
+        """
+        Calculates the most popular payment type.
+
+        Returns:
+            DataFrame: A DataFrame containing only one row with the most popular payment type.
+        """
+
+        dataframe = (
+            self.trip_fare_df.groupBy(columns.payment_type)
+                .count()
+                .orderBy('count', ascending=False)
+                .limit(1)
+        )
+
+        return dataframe
+
+    def highest_fare_amount(self):
+        """
+        Calculates the highest fare when vendor is VTS.
+
+        Returns:
+            DataFrame: A DataFrame containing only one row with the highest fare amount for VTS.
+        """
+
+        dataframe = (
+            self.trip_fare_df.filter(f.col(columns.vendor_id) == 'VTS')
+                .orderBy(columns.fare_amount, ascending=False)
+                .limit(1)
+        )
+
+        return dataframe
+
+    def top_total_amount(self):
+        """
+        Calculates the top 10 total_amount values for drivers when passengers count > 5.
+
+        Returns:
+            DataFrame: A DataFrame containing 10 rows with biggest total_amount values for drivers
+            when passengers count > 5.
+        """
+        dataframe = (
+            self.trip_fare_df.join(self.trip_data_df, [columns.medallion, columns.hack_license,
+                                                       columns.pickup_datetime], 'inner')
+                .filter(f.col(columns.passenger_count) > 5)
+                .groupBy(columns.medallion, columns.hack_license, columns.passenger_count)
+                .agg(f.max(columns.total_amount))
+                .orderBy(f.col(f'max({columns.total_amount})'), ascending=False)
+                .limit(10)
+        )
+
+        return dataframe
+
+    def total_revenue_per_day(self):
+        """
+        Calculates the total revenue for each day of the week, categorized by payment type.
+
+        Returns:
+            DataFrame: A DataFrame with columns: 'pickup_datetime', 'payment_type', 'total_amount',
+            and 'total_revenue_per_day'.
+        """
+
+        dataframe = self.trip_fare_df.withColumn('day_num', f.dayofweek(columns.pickup_datetime))
+
+        window_spec = (
+            Window.partitionBy(
+                f.col('day_num'),
+                f.col(columns.payment_type)
+            ).orderBy(f.col('day_num'))
+        )
+
+        dataframe = dataframe.withColumn('total_revenue_per_day', f.sum(f.col(columns.total_amount)).over(window_spec))
+
+        return dataframe
+
+    def tip_percentage(self):
+        """
+        Calculates percentage of tip to total_amount if payment type not cash.
+        Returns:
+            DataFrame: A DataFrame with new column tips_percentages and only rides which were paid not in cash.
+        """
+        window_spec = Window.partitionBy(columns.medallion, columns.hack_license, columns.pickup_datetime)
+
+        dataframe = self.trip_fare_df.filter(f.col(columns.payment_type) != 'CSH')
+        dataframe = dataframe.withColumn('tips_percetages',
+                                         (f.sum(columns.tip_amount).over(window_spec) /
+                                          f.sum(columns.total_amount).over(window_spec)) * 100)
+
+        return dataframe
+
+    def avg_trip_duration(self):
+        """
+        Calculates the average trip duration for different rate codes.
+        Returns:
+            DataFrame: A DataFrame grouped by rate codes and found avg trip duration time for them
+        """
+        dataframe = (
+            self.trip_data_df
+                .filter(f.col(columns.rate_code).isNotNull())
+                .groupBy(columns.rate_code)
+                .agg(
+                    f.avg(columns.trip_time_in_secs)
+                    .alias('avg_trip_duration')
+                ).orderBy(f.asc(columns.rate_code))
+        )
+
+        return dataframe
