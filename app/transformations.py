@@ -28,6 +28,6 @@ def clean_dataframe(dataframe):
         pyspark.sql.DataFrame
     """
     dataframe = dataframe.dropDuplicates()
-    dataframe = dataframe.dropna()
+    dataframe = dataframe.na.drop("all")
 
     return dataframe
