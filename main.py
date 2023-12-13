@@ -66,6 +66,18 @@ def business_questions(query_manager, csv_manager, output_directory):
     csv_manager.write(top_total_amount, f'{output_directory}/top_total_amount')
     top_total_amount.show()
 
+    total_revenue_per_day = query_manager.total_revenue_per_day()
+    csv_manager.write(total_revenue_per_day, f'{output_directory}/total_revenue_per_day')
+    total_revenue_per_day.show()
+
+    tip_percentage = query_manager.tip_percentage()
+    csv_manager.write(tip_percentage, f'{output_directory}/tip_percentage')
+    tip_percentage.show()
+
+    avg_trip_duration = query_manager.avg_trip_duration()
+    csv_manager.write(avg_trip_duration, f'{output_directory}/avg_trip_duration')
+    avg_trip_duration.show()
+
 
 def main():
     spark_session = (SparkSession.builder
